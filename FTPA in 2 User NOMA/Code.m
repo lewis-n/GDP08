@@ -3,7 +3,8 @@ BW = 10^6; % Bandwidth (Hz)
 P_dBm = 0:1:40;             % Transmission power (dBm)
 P = (10^-3)*10.^(P_dBm/10);   % Transmission power (linear)
 
-%Fixed Power Allocation
+%Fractional Transmit Power Allocation (FTPA)
+
 % Weak User
 d1 = 1000;
 a1 = 0.75;
