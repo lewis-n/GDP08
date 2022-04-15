@@ -50,7 +50,7 @@ for i = 1:length(EbNo)
         n(:,j) = AWGNChannel(s, EbNo(i), k);
     end
 
-    y = s + n;
+    y = PL.*s + n;
     decoded = SIC(y, a, p, mpskmod, mpskdemod);
     [~, BER_AWGN(i,:)] = biterr(x, decoded, [], 'column-wise');
 
