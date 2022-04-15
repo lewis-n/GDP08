@@ -17,8 +17,6 @@ function x_decoded = SIC(y, a, p, mpskmod, mpskdemod)
         mpskmod
         mpskdemod
     end
-    
-    error = (randn(1) + 1i*randn(1))/sqrt(2);
 
     % Direct decoding of first signal
     x_decoded(:,1) = mpskdemod(y(:,1));
