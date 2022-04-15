@@ -1,17 +1,39 @@
-function x_decoded = SIC(y, a, p, e)
- 
+function x_decoded = SIC(y, a, p, mpskmod, mpskdemod)
+
+    %  Successive Interference Cancellation function
+    %
+    %  Returns a matrix of decoded signals
+    %
+    %  y - Matrix of signals received at each user, cols are user signals
+    %  a - Array of power allocation coefficients for each user
+    %  p - Total transmission power
+    %  mpskmod, mpskdemod - PSK modulation and demodulation objects
+    %  Imperfect (optional) - Use imperfect SIC
+
+    arguments
+        y 
+        a double {mustBeInRange(a, 0, 1), mustBeFloat}
+        p double {mustBePositive}
+        mpskmod
+        mpskdemod
+    end
+    
+    error = (randn(1) + 1i*randn(1))/sqrt(2);
+
     % Direct decoding of first signal
-    x_decoded(1,:) = pskdemod(y(1,:), 2, pi);
+    x_decoded(:,1) = mpskdemod(y(:,1));
     
     % Perform SIC on remaining signals
-    for i = 2:size(y, 1)
+    for i = 2:size(y,2)
         
         for j = 2:i
-            x = pskmod(pskdemod(y(i,:), 2, pi), 2, pi);
-            y(i,:) = y(i,:) - (1-sqrt(e))*(sqrt(a(j-1)*p))*x;
+            x = mpskmod(mpskdemod(y(:,i)));
+            y(:,i) = y(:,i) - (sqrt(a(j-1)*p))*x;
         end
 
-        x_decoded(i,:) = pskdemod(y(i,:), 2, pi);
+        x_decoded(:,i) = mpskdemod(y(:,i));
 
     end
 end
+
+% 
