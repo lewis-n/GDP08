@@ -2,16 +2,16 @@ clear; clc; addpath('../../Channel Models')
 
 %  Downlink NOMA simulation
 %
-%  BER performance for each user using perfect SIC
+%  BER performance for each user in downlink NOMA using SIC
 %
 %  Generated data, signals, and channel conditions are specfied as
-%  matrices with dimensions N_users x N_data.
+%  matrices with dimensions N_data x N_users (columns represents channels).
 
 
 %  -------------- Parameters ---------------
 p = 1; % Transmission power
-d = [1, 0.5, 0.2, 0.1]; % User distances from transmitter
-a = [0.75, 0.1875, 0.046875, 0.01171875]; % Power allocation coefficients for each user
+d = [1000, 500]; % Distance of each user from transmitter
+a = [0.8, 0.2]; % Power allocation coefficients for each user
 N_data = 10^6; % Length of data transmitted to each user
 M = 2; % Modulation Order
 k = log2(M); % Bits per symbol
@@ -45,17 +45,18 @@ BER_Fading = zeros(length(EbNo), N_users);
 
 for i = 1:length(EbNo)
     % AWGN Channel
+    % No path loss applied
     rng('default'); % Reset rng
-    for j = 1:N_users
-        n(:,j) = AWGNChannel(s, EbNo(i), k);
-    end
 
-    y = PL.*s + n;
+    y = repmat(s, 1, N_users);
+    y = AWGNChannel(y, EbNo(i), k); % Apply noise
     decoded = SIC(y, a, p, mpskmod, mpskdemod);
     [~, BER_AWGN(i,:)] = biterr(x, decoded, [], 'column-wise');
 
     % Fading Channel
-    y = h.*s + n;
+    % Rayleigh fading + path loss
+    y = h.*s;
+    y = AWGNChannel(y, EbNo(i), k); % Apply noise
     y = y./h; % Equalise
     decoded = SIC(y, a, p, mpskmod, mpskdemod);
     [~, BER_Fading(i,:)] = biterr(x, decoded, [], 'column-wise');
@@ -74,7 +75,8 @@ legend show
 grid on
 ylabel('BER')
 xlabel('EbNo (dB)')
-ylim([4.2E-5 1])
+ylim([1E-5 1])
+xlim([0 16])
 
 figure(2)
 for i = 1:N_users
